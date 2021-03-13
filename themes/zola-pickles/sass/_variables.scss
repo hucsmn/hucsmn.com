@@ -1,0 +1,36 @@
+$bg-color: #fdfcf7;
+$color-text: #444;
+$color-title: #111;
+$color-meta: #888;
+$link-color: #337ab7;
+$link-hover: #175081;
+$fig-height: 45em;
+
+$sans:          "Sarasa UI SC","更纱黑体 UI SC","冬青黑","Segoe UI","Microsoft YaHei","微软雅黑",Helvetica,sans-serif;
+$serif:         Lora,Georgia,"Source Han Serif CN","STFangsong","华文仿宋","FangSong","仿宋",serif;
+$monospace:     "Sarasa Mono Slab SC","等距更纱黑体 Slab SC","Fira Code","Source Code Pro",Monaco,Inconsolata,Consolas,monospace;
+
+// min-width
+$breakpoint-up: (
+  'sm': 'screen and (min-width:640px)',
+  'lmd': 'screen and (min-width:768px)',
+  'lg': 'screen and (min-width:1024px)'
+) !default;
+
+// max-width
+$breakpoint-down: (
+  'md': 'screen and (max-width:767px)'
+) !default;
+
+// @mixin
+@mixin mq-up($breakpoint: md) {
+  @media #{map-get($breakpoint-up, $breakpoint)} {
+    @content;
+  }
+}
+
+@mixin mq-down($breakpoint: md) {
+  @media #{map-get($breakpoint-down, $breakpoint)} {
+    @content;
+  }
+}
