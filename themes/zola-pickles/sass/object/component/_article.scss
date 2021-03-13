@@ -25,6 +25,9 @@
     font-size: 1.4rem;
     color: $color-text;
     line-height: 1.5;
+    & pre {
+      background-color: #faf7ed !important;
+    }
   }
   &__btn {
     display: inline-block;
