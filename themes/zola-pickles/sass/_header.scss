@@ -1,5 +1,36 @@
+@import "variables";
+
 .l-header {
+  position: relative;
   display: block;
   padding: 20px 0;
   text-align: center;
+  max-width: 720px;
+  margin: 0 auto 0;
+}
+
+.l-menu {
+  display: block;
+  position: absolute;
+  top: 3em;
+  right: 0;
+  @media screen and (max-width: 720px) {
+    display: none;
+  }
+}
+
+.l-menu a {
+  display: inline-block;
+  line-height: 1.8;
+  padding: 0.5em 1em;
+  color: $color-meta;
+  font-size: 1.4rem;
+  transition:
+    background-color .2s linear,
+    border-bottom-width .1s linear,
+    border-bottom-color .2s linear;
+  &:hover {
+    background-color: #cccccc22;
+    border-bottom: 3px solid $link-color;
+  }
 }

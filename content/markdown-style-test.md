@@ -2,6 +2,9 @@
 title = "样式测试 style test"
 date = "2021-03-13"
 
+[taxonomies]
+categories = ["meta"]
+tags = ["zola", "markdown"]
 +++
 
 Markdown 样式测试页面。

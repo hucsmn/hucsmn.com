@@ -19,6 +19,11 @@ highlight_theme = "gruvbox-light"
 
 [extra]
 subtitle = "random thoughts on programming"
+menu_links = [
+    { url = "$BASE_URL/about", name = "关于" },
+    { url = "$BASE_URL/categories", name = "分类" },
+    { url = "$BASE_URL/tags", name = "标签" },
+]
 copyright = "Copyright © 2021 hucsmn"
 katex_enable = false
 instantpage_enable = true

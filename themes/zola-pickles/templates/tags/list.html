@@ -1,0 +1,15 @@
+{% extends "index.html" %}
+
+{% block content %}
+<h1>所有标签</h1>
+
+<ul class="terms">
+    {% for term in terms %}
+    <li>
+        <a href="{{ term.permalink }}">
+        #{{ term.name }}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock content %}
