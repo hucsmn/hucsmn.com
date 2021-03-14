@@ -25,12 +25,9 @@
   padding: 0.5em 1em;
   color: $color-meta;
   font-size: 1.4rem;
-  transition:
-    background-color .2s linear,
-    border-bottom-width .1s linear,
-    border-bottom-color .2s linear;
+  border-bottom: 3px solid transparent;
+  transition: border-bottom-color .2s linear;
   &:hover {
-    background-color: #cccccc22;
-    border-bottom: 3px solid $link-color;
+    border-bottom-color: $link-color;
   }
 }
