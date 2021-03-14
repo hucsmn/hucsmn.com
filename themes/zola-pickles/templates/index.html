@@ -49,6 +49,7 @@
         {%- endblock css %}
 
         <link rel='icon' type='image/x-icon' href="{{ get_url(path="favicon.ico") }}" />
+        <link rel="apple-touch-icon" href="{{ get_url(path="apple-touch-icon.png") }}">
 
         {% if config.generate_feed -%}
         <link rel="alternate" type="application/atom+xml" title="{{ config.title }}" href="{{ get_url(path="atom.xml") }}">
