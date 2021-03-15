@@ -63,18 +63,17 @@
         <a href="#main" class="skip-link p-screen-reader-text">Skip to content</a>
         {% block header -%}
         <header class="l-header">
+            <div class="l-logo">
+                <a href="{{ config.base_url }}">
+                    <img alt="{{ config.title }}" src="{{ get_url(path="logo.svg") }}">
+                </a>
+            </div>
             <nav id="menu" class="l-menu">
                 {% for menu_link in config.extra.menu_links %}
                 {% set link_url = menu_link.url | replace(from="$BASE_URL", to=config.base_url) %}
                 <a {% if current_url and current_url == link_url %}class="active"{% endif %} href="{{ link_url }}">{{menu_link.name}}</a>
                 {% endfor %}
             </nav>
-            <h1 class="c-title p-title"><a href="{{ config.base_url }}" class="p-title__link">{{ config.title }}</a></h1>
-            {% if config.extra.subtitle -%}
-            <p class="p-subtitle">
-                {{ config.extra.subtitle }}
-            </p>
-            {% endif -%}
         </header>
         {%- endblock header %}
 

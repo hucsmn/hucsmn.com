@@ -1,8 +1,8 @@
 @import "variables";
 
 .l-header {
-  position: relative;
-  display: block;
+  display: flex;
+  justify-content: space-between;
   padding: 20px 0;
   text-align: center;
   max-width: 720px;
@@ -11,12 +11,6 @@
 
 .l-menu {
   display: block;
-  position: absolute;
-  top: 3em;
-  right: 0;
-  @media screen and (max-width: 720px) {
-    display: none;
-  }
 }
 
 .l-menu a {
@@ -24,10 +18,30 @@
   line-height: 1.8;
   padding: 0.5em 1em;
   color: $color-meta;
+  background-color: transparent;
   font-size: 1.4rem;
   border-bottom: 3px solid transparent;
-  transition: border-bottom-color .2s linear;
+  transition: background-color .1s linear, border-bottom-color .1s linear;
   &:hover {
+    background-color: #eee;
     border-bottom-color: $link-color;
+  }
+}
+
+.l-logo {
+  display: block;
+  width: 7.2rem;
+  height: 7.2rem;
+  top: 0.5em;
+  left: 0;
+}
+
+.l-logo img {
+  width: 7.2rem;
+  height: 7.2rem;
+  outline: none;
+  transition: filter .1s linear;
+  &:hover {
+    filter: invert(15%) hue-rotate(150deg) brightness(140%);
   }
 }
