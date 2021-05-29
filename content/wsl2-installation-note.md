@@ -15,13 +15,13 @@ tags = ["Arch", "WSL"]
 发现 WSL2 内核版本升级了之后，我直接去升级了内核，然而升级完毕 WSL2 就炸了 =_=|||。
 具体的现象是，`/usr/bin` 下面一些可执行文件的大小变成了 0 KB 丢失了数据，猜测是 ext4 的问题，具体原因有待查证。
 
-总之 Arch 系统基本已经报废，既然需要重新配置的话，这里索性把 WSL2 下安装配置 Arch Linux 的步骤记录在此以作备忘。
+总之升级内核导致 WSL2 Arch 基本报废需要重新安装配置，这里索性把 WSL2 下安装配置 Arch Linux 的步骤记录在此以作备忘。
 
-### 基础配置
+### 基础配置安装步骤
 
 #### WSL2 安装配置
 
-操作步骤参考微软官方的[指南](https://docs.microsoft.com/en-us/windows/wsl/install-win10)，WSL2 的安装步骤如下：
+步骤参考微软官方的[指南](https://docs.microsoft.com/en-us/windows/wsl/install-win10)，WSL2 的安装步骤如下：
 
 1. 启用所需的 Windows 功能，包括 Linux 子系统、虚拟机平台。
 
@@ -156,9 +156,81 @@ cd .. && rm -rf yay
 exit
 ```
 
-### WSL hacks
+### WSL hacks and tweaks
 
-#### 在 WSL2 环境下使用 systemd
+基础安装配置部分完成后，这时再搭配上一个[终端](https://github.com/microsoft/terminal)就足够日常使用了。
+
+但是，由于 WSL 使用模式的一些限制，某些在 Linux 服务器下常见的操作默认并不能在 WSL 里直接使用，比如管理后台服务、访问宿主机服务等等。
+
+这时就需要根据需求对 WSL 进行一些魔改操作，本文的后半部分搜集了一系列个人认为比较实用的配置和脚本，以供参考：
+
+#### systemd 和开机自动启动
+
+我们有时需要在 WSL2 下部署 Linux Only 的服务来供 Windows 下开发调用，一般手工运行服务即可，然而在服务比较多时每次都去手工启动或关闭服务就会变得非常麻烦。
+
+WSL2 有自己的 init 进程，它会直接启动指定用户的 login shell，而不会走传统的 sysv init 或 systemd，所以在 WSL2 下并不能直接用 systemctl 命令启动服务。
+
+为了解决在 WSL2 下使用 systemd 的问题，[wsl2-hacks](https://github.com/shayne/wsl2-hacks) 提供了一种手工替换 root 用户 login shell + 脚本 nsenter 执行 systemd 的思路（需要保证 `/etc/wsl.conf` 下默认登陆用户配置为 root），具体操作如下：
+
+1. 将 root 用户的 login shell 替换为脚本，在脚本中启动 systemd 并登陆到指定用户。
+
+```bash
+# 安装脚本所需的依赖 daemonize
+sudo -u 用户名 yay -S daemonize
+
+# 创建 systemd 启动脚本
+cat > /bin/wsl-login <<'EOF'
+#!/bin/bash
+UNAME="用户名"
+
+UUID=$(id -u "${UNAME}")
+UGID=$(id -g "${UNAME}")
+UHOME=$(getent passwd "${UNAME}" | cut -d: -f6)
+USHELL=$(getent passwd "${UNAME}" | cut -d: -f7)
+
+if [[ -p /dev/stdin || "${BASH_ARGC}" > 0 && "${BASH_ARGV[1]}" != "-c" ]]; then
+    USHELL=/bin/bash
+fi
+
+if [[ "${PWD}" = "/root" ]]; then
+    cd "${UHOME}"
+fi
+
+# get pid of systemd
+SYSTEMD_PID=$(pgrep -xo systemd)
+
+# if we're already in the systemd environment
+if [[ "${SYSTEMD_PID}" -eq "1" ]]; then
+    exec "${USHELL}" "$@"
+fi
+
+# start systemd if not started
+/usr/sbin/daemonize -l "${HOME}/.systemd.lock" /usr/bin/unshare -fp --mount-proc /lib/systemd/systemd --system-unit=basic.target 2>/dev/null
+# wait for systemd to start
+while [[ "${SYSTEMD_PID}" = "" ]]; do
+    sleep 0.05
+    SYSTEMD_PID=$(pgrep -xo systemd)
+done
+
+# enter systemd namespace
+exec /usr/bin/nsenter -t "${SYSTEMD_PID}" -m -p --wd="${PWD}" /sbin/runuser -s "${USHELL}" "${UNAME}" -- "${@}"
+EOF
+chmod +x /bin/wsl-login
+
+# 切换 root 用户的 login shell
+echo /bin/wsl-login >> /etc/shells
+chsh -s /bin/wsl-login root
+```
+
+2. 保证默认登陆用户为 root，重启进入 WSL2 测试。
+
+```powershell
+wsl -t Arch
+wsl -d Arch -u root
+```
+
+3. 在 Windows 计划任务里，添加一条开机自动执行命令 `C:\Windows\System32\wsl.exe -d Arch -u root -- exit`，这样就可以保证 systemd 下启用的服务在 Windows 开机时也会被自动启动。
+不推荐内存小于 16G 的机器设置 systemd 自动启动，因为 WSL2 虚拟机的内存占用会随着时间增大。
 
 #### 宿主机 IP 获取
 
