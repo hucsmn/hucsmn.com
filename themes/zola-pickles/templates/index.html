@@ -59,6 +59,7 @@
         {%- endblock extra_head %}
 
         <script type="module" src="https://cdn.jsdelivr.net/npm/@better-scroll/core@2/dist/core.esm.js" async></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@better-scroll/mouse-wheel@2/dist/mouse-wheel.esm.js" async></script>
         <script type="module" src="https://cdn.jsdelivr.net/npm/@better-scroll/scroll-bar@2/dist/scroll-bar.esm.js" async></script>
     </head>
     <body>
@@ -142,19 +143,26 @@
 
         <script type="module">
             import BScroll from 'https://cdn.jsdelivr.net/npm/@better-scroll/core@2/dist/core.esm.js';
+            import MouseWheel from 'https://cdn.jsdelivr.net/npm/@better-scroll/mouse-wheel@2/dist/mouse-wheel.esm.js';
             import ScrollBar from 'https://cdn.jsdelivr.net/npm/@better-scroll/scroll-bar@2/dist/scroll-bar.esm.js';
 
+            BScroll.use(MouseWheel);
             BScroll.use(ScrollBar);
             let bs = new BScroll(document.body, {
                 scrollX: true,
                 scrollY: true,
+                bounce: false,
+                momentum: true,
+                deceleration: 0.005,
+                mouseWheel: {
+                    speed: 20,
+                },
                 scrollbar: {
                     fade: true,
                     interactive: true,
                     scrollbarTrackClickable: true,
                 },
             });
-            console.log(bs);
         </script>
     </body>
 </html>
