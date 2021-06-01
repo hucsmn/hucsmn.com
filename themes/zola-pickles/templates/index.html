@@ -58,83 +58,104 @@
         {% block extra_head -%}
         {%- endblock extra_head %}
 
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@better-scroll/core@2/dist/core.esm.js" async></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@better-scroll/scroll-bar@2/dist/scroll-bar.esm.js" async></script>
     </head>
     <body>
-        <a href="#main" class="skip-link p-screen-reader-text">Skip to content</a>
-        {% block header -%}
-        <header class="l-header">
-            <div class="l-logo">
-                <a href="{{ config.base_url }}">
-                    <img alt="{{ config.title }}" src="{{ get_url(path="logo.svg") }}">
-                </a>
-            </div>
-            <nav id="menu" class="l-menu">
-                {% for menu_link in config.extra.menu_links %}
-                {% set link_url = menu_link.url | replace(from="$BASE_URL", to=config.base_url) %}
-                <a {% if current_url and current_url == link_url %}class="active"{% endif %} href="{{ link_url }}">{{menu_link.name}}</a>
+        <div class="l-container">
+            <a href="#main" class="skip-link p-screen-reader-text">Skip to content</a>
+            {% block header -%}
+            <header class="l-header">
+                <div class="l-logo">
+                    <a href="{{ config.base_url }}">
+                        <img alt="{{ config.title }}" src="{{ get_url(path="logo.svg") }}">
+                    </a>
+                </div>
+                <nav id="menu" class="l-menu">
+                    {% for menu_link in config.extra.menu_links %}
+                    {% set link_url = menu_link.url | replace(from="$BASE_URL", to=config.base_url) %}
+                    <a {% if current_url and current_url == link_url %}class="active"{% endif %} href="{{ link_url }}">{{menu_link.name}}</a>
+                    {% endfor %}
+                </nav>
+            </header>
+            {%- endblock header %}
+
+            <main id="main" class="l-main">
+                {% block content -%}
+                {% for page in paginator.pages %}
+                <article class="c-article p-list-article">
+                    {{ post_macros::title(page=page) }}
+                    <div class="c-article__summary">
+                        {{ page.content | safe }}
+                    </div>
+                </article>
                 {% endfor %}
-            </nav>
-        </header>
-        {%- endblock header %}
-
-        <main id="main" class="l-main">
-            {% block content -%}
-            {% for page in paginator.pages %}
-            <article class="c-article p-list-article">
-                {{ post_macros::title(page=page) }}
-                <div class="c-article__summary">
-                    {{ page.content | safe }}
-                </div>
-            </article>
-            {% endfor %}
-            
-            <nav class="c-pagination p-pagination">
-                <div class="c-pagination__ctrl">
-                    <div class="c-pagination__newer">
-                        {% if paginator.previous -%}
-                        <a href="{{ paginator.previous }}">Newer</a>
-                        {%- endif %}
+                
+                <nav class="c-pagination p-pagination">
+                    <div class="c-pagination__ctrl">
+                        <div class="c-pagination__newer">
+                            {% if paginator.previous -%}
+                            <a href="{{ paginator.previous }}">Newer</a>
+                            {%- endif %}
+                        </div>
+                        <div class="c-pagination__older">
+                            {% if paginator.next -%}
+                            <a href="{{ paginator.next }}">Older</a>
+                            {%- endif %}
+                        </div>
                     </div>
-                    <div class="c-pagination__older">
-                        {% if paginator.next -%}
-                        <a href="{{ paginator.next }}">Older</a>
-                        {%- endif %}
-                    </div>
-                </div>
-                <span class="c-pagination__count p-pagination__count">Page {{ paginator.current_index }} of {{ paginator.number_pagers }}</span>
-            </nav>
+                    <span class="c-pagination__count p-pagination__count">Page {{ paginator.current_index }} of {{ paginator.number_pagers }}</span>
+                </nav>
 
-            {%- endblock content %}
-        </main>
+                {%- endblock content %}
+            </main>
 
-     
-      <footer class="l-footer">
-          {% block footer -%}
-          <p class="p-copyright">
-              {% if config.extra.copyright -%}
-              {% set content = config.extra.copyright | markdown(inline=true) %}
-              {{ content | safe }}
-              {%- endif %}
-          </p>
-          {%- endblock footer %}
-      </footer>
+        
+            <footer class="l-footer">
+                {% block footer -%}
+                <p class="p-copyright">
+                    {% if config.extra.copyright -%}
+                    {% set content = config.extra.copyright | markdown(inline=true) %}
+                    {{ content | safe }}
+                    {%- endif %}
+                </p>
+                {%- endblock footer %}
+            </footer>
+        </div>
 
-      {% if config.extra.analytics -%}
-      <!-- Global site tag (gtag.js) - Google Analytics -->
-      <script async src="https://www.googletagmanager.com/gtag/js?id={{ config.extra.analytics }}"></script>
-      <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
+        {% if config.extra.analytics -%}
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ config.extra.analytics }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
 
-          gtag('config', '{{ config.extra.analytics }}');
-      </script>
-      {%- endif %} 
-      {% if config.extra.katex_enable -%}
-      <link rel="stylesheet" href="{{ get_url(path="css/katex.min.css") }}">
-      <script defer src="{{ get_url(path="js/katex.min.js") }}"></script>
-      <script defer src="{{ get_url(path="js/mathtex-script-type.min.js") }}"></script>
-      {%- endif %}
+            gtag('config', '{{ config.extra.analytics }}');
+        </script>
+        {%- endif %} 
+        {% if config.extra.katex_enable -%}
+        <link rel="stylesheet" href="{{ get_url(path="css/katex.min.css") }}">
+        <script defer src="{{ get_url(path="js/katex.min.js") }}"></script>
+        <script defer src="{{ get_url(path="js/mathtex-script-type.min.js") }}"></script>
+        {%- endif %}
+
+        <script type="module">
+            import BScroll from 'https://cdn.jsdelivr.net/npm/@better-scroll/core@2/dist/core.esm.js';
+            import ScrollBar from 'https://cdn.jsdelivr.net/npm/@better-scroll/scroll-bar@2/dist/scroll-bar.esm.js';
+
+            BScroll.use(ScrollBar);
+            let bs = new BScroll(document.body, {
+                scrollX: true,
+                scrollY: true,
+                scrollbar: {
+                    fade: true,
+                    interactive: true,
+                    scrollbarTrackClickable: true,
+                },
+            });
+            console.log(bs);
+        </script>
     </body>
 </html>
             

@@ -16,15 +16,12 @@
 .l-menu a {
   display: inline-block;
   line-height: 1.8;
-  padding: 0.5em 1em;
+  padding: calc(20px + 0.5em) 1em 0.5em;
+  margin-top: -20px;
   color: $color-meta;
-  background-color: transparent;
   font-size: 1.4rem;
-  border-bottom: 3px solid transparent;
-  transition: background-color .1s linear, border-bottom-color .1s linear;
   &:hover {
-    background-color: #eee;
-    border-bottom-color: $link-color;
+    background: linear-gradient(#ccc0, #ccc4);
   }
 }
 
