@@ -142,9 +142,9 @@
         {%- endif %}
 
         <script type="module">
-            import BScroll from '{{ get_url(path="js/bscroll/core.esm.min.js") }}';
-            import MouseWheel from '{{ get_url(path="js/bscroll/mouse-wheel.esm.min.js") }}';
-            import ScrollBar from '{{ get_url(path="js/bscroll/scroll-bar.esm.min.js") }}';
+            import BScroll from '/js/bscroll/core.esm.min.js';
+            import MouseWheel from '/js/bscroll/mouse-wheel.esm.min.js';
+            import ScrollBar from '/js/bscroll/scroll-bar.esm.min.js';
 
             BScroll.use(MouseWheel);
             BScroll.use(ScrollBar);
