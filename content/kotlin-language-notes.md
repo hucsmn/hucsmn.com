@@ -7,9 +7,11 @@ categories = ["blog"]
 tags = ["Kotlin", "Programming", "Language"]
 +++
 
-学习 Kotlin，简要记录一些语言细节以供备忘。写测试代码用的 Kotlin 语言版本为 1.5。
+学习 Kotlin，简要记录一些语言细节以供备忘。
 
-### 基本语法
+本文使用 Kotlin 1.5 版本编译器，只讨论 JVM 编译目标，不考虑 JS 等编译目标。
+
+### 语言基础
 
 #### 字面量
 
@@ -90,7 +92,7 @@ Kotlin 支持以下这些操作符：
 13. `!`, `+`, `-` 逻辑非、取正、取负运算符，作为前缀使用。
 14. `@` annotation, label `@` 注解或标签一元运算符，作为前缀使用，用于给修饰的表达式添加注解或标签。
 15. `[` index [ `,` ... ] `]`, `.`, `.?`, `::` 下标运算符、成员访问操作符、安全成员访问操作符、方法引用操作符。
-16. `(` `)`, `(` `)` `{` `}` , `{` `}` 调用操作符、带匿名函数的调用操作符、单个匿名函数参数的调用操作符，支持重载。
+16. `(` `)`, `(` `)` `{` `}` , `{` `}` 调用操作符、结尾带 lambda 表达式参数的调用、单个 lambda 表达式为参数的调用，调用支持重载。
 17. infix 自定义中缀操作符，比如 `0 until 10` 中 until 是一个自定义的中缀操作符
 
 ```kotlin
@@ -173,13 +175,11 @@ fun castAny(x: Any): Any {
 
 #### 控制流
 
-Kotlin 的控制流有 `if else`、`when`、`for`、`while`、`do while`、`break`、`continue`、`try catch finally`、`throw`、`return`，囊括了条件判断、循环迭代、异常处理、强制跳转在内的常见控制流。
+Kotlin 支持 `if else`、`when`、`for`、`while`、`do while`、`break`、`continue`、`try catch finally`、`throw`、`return` 等常见控制流。
 
-Kotlin 的一些控制流属于表达式，而不仅仅是语句。比如，涉及条件判断和异常处理的 `if else`、`when`、`try catch finally` 这几种控制流都属于表达式，它们可以返回一个值。此外，`break`、`continue`、`throw`、`return` 在 Kotlin 里同样也可以用在表达式的位置，不过它们的返回类型是底类型 [Nothing](https://kotlinlang.org/spec/built-in-types-and-their-semantics.html#kotlin.nothing-builtins)，代表执行到此处并不会正常返回。
+其中，一些控制流属于表达式。比如，涉及条件判断和异常处理的 `if else`、`when`、`try catch finally` 属于表达式，可以返回一个值。而涉及跳转的 `break`、`continue`、`throw`、`return` 同样也可以用在表达式的位置，返回类型为底类型 [Nothing](https://kotlinlang.org/spec/built-in-types-and-their-semantics.html#kotlin.nothing-builtins)，代表此处不会正常返回任何值。
 
-与更激进的语言比如 Rust 不同，Kotlin 并不是所有控制流都是表达式。循环迭代的 `for`、`while`、`do while` 都属于语句，并不能当作表达式来使用。
-
-下面举例说明 Kotlin 的控制流写法，着重介绍和 Java 不同的地方：
+Kotlin 并不是所有控制流都是表达式，比如循环迭代的 `for`、`while`、`do while` 等控制流属于语句，不能当作表达式来使用。
 
 1. 条件判断
 
@@ -483,7 +483,7 @@ class Incrementer(dx: Double, dy: Double) {
 Kotlin 的函数或方法定义可以被注解，或是被修饰符修饰，常见的修饰符有：
 
 1. `tailrec` 尾递归修饰符，编译器会将符合条件的尾递归函数转化为等价的循环实现。
-2. `inline` 允许内联优化，主要用于减少匿名函数开销。此外，当开启了内联函数时，Kotlin 允许使用 "非局部 return"。
+2. `inline` 允许内联优化，主要用于减少 lambda 表达式开销。此外，当开启了内联函数时，Kotlin 允许使用 "非局部 return"。
 3. `suspend` 声明为可挂起的函数或方法，编译器通过 CPS 变换实现异步，suspend 只能被 suspend 调用。
 4. `operator` 修饰类的方法，用于操作符重载。
 5. `infix` 修饰类的方法，可作为中缀操作符来调用。
@@ -524,13 +524,13 @@ fun factorial(n: Int): Int {
 
 // 内联函数或方法在调用时会被内联到调用方，因此首先要保证不访问任何私有成员
 //
-// Kotlin 的 inline 修饰符不仅影响内联函数本身，也会默认导致入参中的匿名函数自动被内联
-// 这样有一个效果是，被内联的匿名函数中允许直接写 return 来返回最靠近调用位置的方法或函数
-// 即内联函数允许入参的匿名函数使用 "非局部 return"
+// Kotlin 的 inline 修饰符不仅影响内联函数本身，也会默认导致入参中的 λ 表达式自动被内联
+// 这样有一个效果是，被内联的 λ 表达式中允许直接写 return 来返回最靠近调用位置的方法或函数
+// 即内联函数允许入参的 λ 表达式使用 "非局部 return"
 //
-// 为了控制对入参匿名函数的内联，可以使用 noinline 形参修饰符完全禁止内联入参的匿名函数
+// 为了控制对入参 λ 表达式的内联，可以使用 noinline 形参修饰符完全禁止内联入参的 λ 表达式
 // 使用 crossinline 形参修饰符则标记该参数虽然会被内联，但里面禁止使用 "非局部 return"
-// 下面这种返回匿名函数的内联函数，就是典型的需要入参写 croosinline 修饰符的情况
+// 下面这种返回 λ 表达式的内联函数，就是典型的需要入参写 croosinline 修饰符的情况
 inline fun <A, B, C> nest(crossinline f: (A) -> B, crossinline g: (B) -> C): (A) -> C {
     return { a: A -> g(f(a)) }
 }
@@ -589,23 +589,38 @@ class Option<out T : Any> {
 
 列举一些在面向对象的语法和语义上 Kotlin 比较有特点的地方：
 
-2. 实例化对象时，调用构造函数不允许加 `new` 前缀。
-3. 定义类时允许在类名后面直接写一个主要构造函数，也支持在类内部使用 `constructor` 关键字定义次要构造函数。和 Java 一样，不写任何构造函数则默认给一个空构造函数。
-4. Kotlin 支持定义不同类型的类或接口：普通类 `class`、接口 `interface`、枚举类 `enum class`、注解 `annotation class`、数据实体类 `data class` 自动实现 getter/setter/toString/copy/equals/hashCode/componentsN 等常见方法、内联类 `value class` 用于告知编译器允许直接内联优化掉、密封类 `sealed class` 只允许本包中的类继承、密封接口 `sealed interface` 只允许本包中的类实现、函数式接口 `fun interface` 只包含唯一一个抽象方法可作为匿名函数类型使用的接口。
-5. 可以使用 `object` 关键字来定义单例或者匿名内部类对象。
-6. 可以通过 `typealias` 定义类型别名，只允许在 Kotlin 内使用别名，在 Java 下无法使用。
-7. 泛型参数允许使用 `out`/`in` 修饰符来指定参数类型的协变/逆变关系。
-8. 不允许定义静态成员，要通过 `companion` 伴生对象来模拟。
-9. 类的内部定义的类，默认是静态内部类，如果需要定义引用上级对象 `this` 的内部类应当显式地通过 `inner class` 来定义。
-10. 类以及类成员的访问修饰符支持 `private` 私有、`protected` 子类可见、`internal` 包可见、`public` 共有，和 Java 的四个级别一一对应，但 Kotlin 默认的修饰符是 `public` 而不是 `internal`。
-11. 类以及类成员如果不加 `open` 修饰符则默认都不允许重载，即默认自带 `final`。如果加了 `abstract`/`sealed` 修饰符则默认 `open`，接口成员默认 `open`。
-12. 类实现接口允许通过 `by` 关键字使用委托模式语法糖，会自动嵌入一个私有的 synthetic 字段在初始化时存放委托对象。
-13. 非私有的属性会自动生成对应的 getter/setter，对应的类字段本身是 `private` 修饰。Kotlin 默认使用 getter/setter 进行成员访问。
-14. 由于自动生成 getter/setter 方法，属性就可以和方法一样被 `override` 修饰并重写。
-15. 除非被 `abstract` 修饰，否则属性或者私有的类字段必须被初始化。这和 Java 自动放零值，不要求必须初始化的行为不一样。
-16. Kotlin 支持用语法糖写自定义 getter/setter，更进一步也支持使用 'by' 关键字写属性委托。被 `private` 修饰的类字段可以自定义其私有的 getter/setter，但不能使用属性委托。
-17. Kotlin 的接口里中不仅可以写方法，还可以写属性，本质上依然是调用 getter/setter。
-18. 支持操作符重载 `operator`、中缀操作符 `infix` 等一系列语法糖。
+1. 实例化对象时，*调用构造函数不加 `new` 前缀*。
+
+2. 定义类时允许在类名后面直接写一个**主要构造函数**，也支持在类内部使用 `constructor` 关键字定义次要构造函数。与 Java 类似，不写构造函数，Kotlin 编译器则默认生成一个空参数列表的构造函数。
+3. Kotlin 支持定义多种不同类型的类或接口：
+   1. 普通类 `class`。
+   2. 普通接口 `interface`。
+   3. 枚举类 `enum class`。
+   4. 注解 `annotation class`。
+   5. 数据实体类 `data class` 自动实现 getter/setter/toString/equals 等实体类常用的方法。
+   6. 内联类 `value class` 用于告知编译器此类允许被直接内联优化掉。
+   7. 密封类 `sealed class` 只允许本包内的类继承。
+   8. 密封接口 `sealed interface` 只允许本包内的类实现。
+   9. 函数式接口 `fun interface` 用于支持 λ 表达式的 [SAM 转换](https://kotlinlang.org/docs/fun-interfaces.html#sam-conversions)。
+4. 可以使用 `object` 关键字，声明单例，或者创建匿名内部类对象。
+5. *不允许定义静态成员*，只能通过 `companion object` 伴生对象模拟相似的效果。
+6. 支持通过 `typealias` 定义类型的别名，不过别名只允许在 Kotlin 内使用，对 Java 来说不可见。
+7. 泛型参数允许使用 `out`/`in` 修饰符来指定子类型关系中的协变或逆变。其中， `out` 修饰的泛型参数可用在普通方法的出参位置、构造方法的入参位置，代表泛型参数对于类型整体是**协变**的；`in` 修饰的泛型参数只可以用在普通方法入参位置，代表泛型参数对于类型整体是**逆变**的。
+8. 类的内部定义的类默认是静态内部类，如果需要定义引用上级对象的 `this`，应当显式地通过 `inner class` 来定义内部类。
+9. 类以及类成员支持以下修饰符，和 Java 的四个访问级别是一一对应的：
+   1. `private` 私有成员。
+   2. `protected` 子类可见。
+   3. `internal` 包内可见，对应 Java 不使用修饰符的情况。
+   4. `public` 公有成员，Kotlin 下不使用修饰符的情况，*默认访问修饰符是 `public`*。
+10. 类以及类成员如果不加 `open` 修饰符则默认都不允许重载，即*默认自带 `final` 不允许继承或重写*。如果加了 `abstract`/`sealed` 修饰则默认是 `open`，如果是定义在接口内的成员则一律默认 `open`。
+11. 类实现接口时，通过 `by` 关键字可以一键委托模式，Kotlin 编译器会自动嵌入私有的 synthetic 字段在初始化时存放委托对象。
+12. 非私有的*属性默认自动生成 getter/setter*，底层对应的类字段则一定是 `private`。Kotlin 默认使用 getter/setter 进行成员访问，不过也支持访问 Java 类的公有字段。
+13. *属性和方法一样可以修饰 `override` 来重写*，代表：定义新的字段不使用父类同名字段、并重写 getter/setter。
+14. 除非被 `abstract` 修饰，否则属性或私有字段*必须初始化*。
+15. Kotlin 允许通过类似 C# 的语法来为属性定义 getter/setter，进一步也支持 `by` 关键字委托 getter/setter。被 `private` 修饰的私有字段可以自定义私有的 getter/setter，不过不能使用属性委托。
+16. 接口不仅可以声明方法，还可以声明属性。本质上是声明属性的 getter/setter 方法。
+17. 语言层面支持操作符重载 `operator`、中缀操作符 `infix`。
+
 ```kotlin
 // 定义密封接口，只允许同包下实现该接口
 // 泛型参数可以额外修饰 out/in，out 代表协变，in 代表逆变
@@ -714,14 +729,230 @@ fun main() {
 }
 ```
 
-#### 匿名函数
+####  λ 表达式
 
-// TODO
+Kotlin 的 λ 表达式一般使用类似 Groovy 的大括号语法，通过 `->` 来分隔形参列表和方法体。没有形参或者形参唯一时，可以省略形参列表及 `->` 分隔符，唯一的参数可以使用 `it` 关键字指代。仅在允许内联的上下文中，λ 表达式才可以直接用 [non-local return](https://kotlinlang.org/docs/returns.html#return-to-labels)。在不指定 this 类型的上下文中，λ 表达式不允许直接使用 `this` 关键字。
 
-### 类型
+```kotlin
+fun main() {
+    execute(
+        // λ 表达式内只写一个简单的表达式
+        { 0 },
+        useThis(
+            chain(
+                // λ 表达式支持写形参并标注形参类型，但是不支持参数默认值、不支持泛型参数、不支持标注返回值类型,
+                { x: Int -> x + 1 },
+                // 形参也可以不标注类型
+                { x -> x + 1 },
+                // 只有单个参数时可以不写形参，用 it 关键字来指代这个形参
+                { it + 1 },
+            )
+        ),
+        {
+            println("it: $it")
+        },
+    )
+}
 
-// TODO
+fun <T> chain(vararg steps: (T) -> T): (T) -> (T) {
+    return wrapper@{ input: T ->
+        var previous = input
+        for (step in steps) {
+            previous = step(previous)
+        }
+        // 此处并不允许写 non-local return
+        return@wrapper previous
+    }
+}
 
-### 协程
+fun <T> useThis(chain: (T) -> T): T.() -> T {
+    return {
+        // 上下文中指定了这个 λ 表达式的 this 类型为 T，因此这里才可以用 this
+        println("this: $this")
+        chain(this)
+    }
+}
 
-// TODO
+// 第一个形参是 Java 的 SAM 接口，第三个形参类型是 Kotlin 的函数式接口
+// 在被调用时，Kotlin 会对第一个和第三个实参传入的 λ 表达式进行 SAM 转换
+inline fun <T> execute(supplier: java.util.function.Supplier<T>, processor: T.() -> T, sink: Sink<T>) {
+    // 调用 Java SAM 接口方法，不会被内联
+    val provided = supplier.get()
+    // 传 this 调用 T.() -> T 类型的 λ 表达式，可以被内联
+    val processed = provided.processor()
+    // 调用 Kotlin 函数式接口方法，不会被内联
+    sink.feed(processed)
+}
+
+fun interface Sink<in T> {
+    fun feed(data: T)
+}
+```
+
+此外，Kotlin 还支持类似 JavaScript 的 `fun` 匿名函数语法，和大括号语法大同小异。`fun` 写法支持标注匿名函数的返回值类型，并且内部的 `return` 默认并不是 non-local return。`fun` 写法的匿名函数，不支持使用 `tailrec` 在内的修饰符，内部不能用 `it` 关键字简写指代第一个形参。只有在指定了 this 传参时，才允许在函数体内使用 `this`。
+
+```kotlin
+fun main() {
+    // 使用 fun 关键字定义匿名函数
+    invoke(fun() {
+        println("hello world")
+    })
+
+    println(invoke(
+        0,
+        // fun 关键字定义匿名函数时，必须指定参数和返回值类型，不可以省略
+        // 同样地：不支持参数默认值、不支持泛型参数
+        fun(x: Int): Int {
+            // return 代表返回当前匿名函数，而不是 non-local return 返回 main 函数
+            // 不能省略参数再使用 it 关键字指代
+            return x + 1
+        },
+    ))
+
+    println(invokeWithThis(
+        0,
+        // fun 关键字定义匿名函数时，可以使用 Type. 的形式指定 this 传参
+        fun Int.(): Int {
+            // 此时可以使用 this
+            return this + 1
+        },
+    ))
+}
+
+inline fun <T> invoke(fn: () -> T): T {
+    return fn()
+}
+
+inline fun <T, R> invoke(input: T, fn: (T) -> R): R {
+    return fn(input)
+}
+
+inline fun <T, R> invokeWithThis(input: T, fn: T.() -> R): R {
+    return input.fn()
+}
+```
+
+和 Java 类似，Kotlin 支持通过 `::` 引用方法，来简化 λ 表达式的书写。
+
+```kotlin
+fun main() {
+    // 从类名引用方法
+    val map1: (Wrapper<Int>, (Int) -> Int) -> Wrapper<Int> = Wrapper<Int>::map
+
+    // 通过标注类型，避免引用重载方法时歧义
+    val map2: (Wrapper<Int>) -> Wrapper<Int> = Wrapper<Int>::map
+
+    // 从对象实例引用方法
+    val map3: ((Int) -> Int) -> Wrapper<Int> = Wrapper(10086)::map
+
+    // Kotlin 暂不支持引用某些泛型方法，参见 KT-12140、KT-13003
+    //val map4: (Wrapper<Int>, (Int) -> Int) -> Wrapper<Int> = Wrapper<Int>::genericMap
+    val map4: (Wrapper<Int>, (Int) -> Int) -> Wrapper<Int> = { self, fn -> self.genericMap(fn) }
+
+    // 从对象单例引用其方法，和从对象实例引用方法的逻辑相同，注意 Singleton 是实例而不是类型
+    val singletonMethod1: (String) -> Unit = Singleton::say
+
+    // 从类名引用属性 getter
+    val value1: (Wrapper<Int>) -> Int = Wrapper<Int>::value
+
+    // 从对象实例引用属性 getter
+    val value2: () -> Int = Wrapper(10086)::value
+
+    // 从顶级类名引用构造方法
+    val constructor1: () -> Foo = ::Foo
+    val constructor2: (Int) -> Foo = ::Foo
+    val constructor3: (Int) -> Wrapper<Int> = ::Wrapper
+
+    // 单例对象虽然首字母大写但并不是一个类型，并不能引用它的构造函数
+    //val constructor4: () -> Singleton = ::Singleton
+
+    // 伴生对象方法并不能直接引用，必须明确指定是哪一个伴生对象，再来引用其方法
+    //val companionMethod1: (Int) -> Foo = Foo::of
+    val companionMethod1: (Int) -> Foo = Foo.Companion::of
+
+    // 从顶级函数名引用函数
+    val function1: () -> Int = ::bar
+    val function2: (Int) -> Unit = ::baz
+}
+
+data class Wrapper<T>(val value: T) {
+    fun map(): Wrapper<T> {
+        return Wrapper(value)
+    }
+
+    fun map(fn: (T) -> T): Wrapper<T> {
+        return Wrapper(fn(value))
+    }
+
+    fun <R> genericMap(fn: (T) -> R): Wrapper<R> {
+        return Wrapper(fn(value))
+    }
+
+    companion object {
+        fun <T> of(value: T): Wrapper<T> {
+            return Wrapper(value)
+        }
+    }
+}
+
+object Singleton {
+    fun say(sentence: String) {
+        println(sentence)
+    }
+}
+
+data class Foo(val value: Int) {
+    constructor() : this(0)
+
+    companion object {
+        fun of(value: Int): Foo {
+            return Foo(value)
+        }
+    }
+}
+
+fun bar(): Int {
+    return 0
+}
+
+fun <T> baz(input: T) {
+    println(input)
+}
+```
+
+#### 集合
+
+//TODO
+
+### 类型系统
+
+#### 空值处理
+
+//TODO
+
+#### 函数类型
+
+//TODO
+
+#### 子类型与泛型
+
+//TODO
+
+#### 类型约束
+
+//TODO
+
+#### 反射
+
+//TODO
+
+### 异步编程
+
+#### 可挂起函数
+
+//TODO
+
+#### 协程
+
+//TODO
+
